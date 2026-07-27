@@ -13,6 +13,7 @@ describe('FeedApi', () => {
       getResponse: vi.fn(),
       post: vi.fn(),
       postResponse: vi.fn(),
+      getConfig: vi.fn(() => ({ marketplaceId: 'EBAY_US' })),
     } as unknown as EbayApiClient;
     feedApi = new FeedApi(mockClient);
   });
@@ -31,10 +32,18 @@ describe('FeedApi', () => {
       feedApi.createTask({ feedType: 'FX_LISTING', schemaVersion: '1.0' }),
     );
 
-    expect(mockClient.postResponse).toHaveBeenCalledWith('/sell/feed/v1/task', {
-      feedType: 'FX_LISTING',
-      schemaVersion: '1.0',
-    });
+    expect(mockClient.postResponse).toHaveBeenCalledWith(
+      '/sell/feed/v1/task',
+      {
+        feedType: 'FX_LISTING',
+        schemaVersion: '1.0',
+      },
+      {
+        headers: {
+          'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
+        },
+      },
+    );
     expect(result).toEqual({
       location: 'https://api.ebay.com/sell/feed/v1/task/task-123',
       taskId: 'task-123',

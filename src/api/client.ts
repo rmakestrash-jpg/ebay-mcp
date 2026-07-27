@@ -601,4 +601,38 @@ export class EbayApiClient {
   async getWithFullUrl<T = unknown>(fullUrl: string, params?: Record<string, unknown>): Promise<T> {
     return await this.request<T>('GET', fullUrl, { params, absolute: true });
   }
+
+  /**
+   * Make a POST request with a full URL and retain response metadata.
+   * Used by APIs such as Media that are hosted on the `apim` subdomain.
+   */
+  async postWithFullUrlResponse<T = unknown>(
+    fullUrl: string,
+    data?: unknown,
+    config?: EbayRequestConfig,
+  ): Promise<HttpResponse<T>> {
+    return await this.requestWithResponse<T>('POST', fullUrl, {
+      data,
+      params: config?.params,
+      headers: config?.headers,
+      responseType: config?.responseType,
+      absolute: true,
+    });
+  }
+
+  /**
+   * Make a GET request with a full URL and retain response metadata.
+   */
+  async getWithFullUrlResponse<T = unknown>(
+    fullUrl: string,
+    params?: Record<string, unknown>,
+    config?: EbayRequestConfig,
+  ): Promise<HttpResponse<T>> {
+    return await this.requestWithResponse<T>('GET', fullUrl, {
+      params: { ...params, ...config?.params },
+      headers: config?.headers,
+      responseType: config?.responseType,
+      absolute: true,
+    });
+  }
 }

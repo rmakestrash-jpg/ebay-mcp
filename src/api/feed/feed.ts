@@ -83,14 +83,23 @@ export class FeedApi {
     Effect.gen(this, function* () {
       const feedType = yield* requireStringEffect(input.feedType, 'feedType');
       const schemaVersion = yield* requireStringEffect(input.schemaVersion, 'schemaVersion');
+      const marketplaceId =
+        (yield* optionalStringEffect(input.marketplaceId, 'marketplaceId')) ??
+        this.client.getConfig().marketplaceId;
       const path = `${FEED_BASE_PATH}/task`;
 
       const response = yield* Effect.tryPromise({
         try: () =>
-          this.client.postResponse<void>(path, {
-            feedType,
-            schemaVersion,
-          }),
+          this.client.postResponse<void>(
+            path,
+            {
+              feedType,
+              schemaVersion,
+            },
+            {
+              headers: marketplaceId ? { 'X-EBAY-C-MARKETPLACE-ID': marketplaceId } : undefined,
+            },
+          ),
         catch: (cause) => new EbayApiError({ method: 'POST', path, cause }),
       });
       const location = response.headers.location;

@@ -11,6 +11,13 @@ export const createFeedTaskInputSchema = z.object({
     .min(1)
     .default('1.0')
     .describe('Feed file schema version; Seller Hub feed types currently use 1.0'),
+  marketplaceId: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'eBay marketplace header for this task, such as EBAY_US; defaults to the configured marketplace',
+    ),
 });
 
 /** Input accepted by Feed API uploadFile. */

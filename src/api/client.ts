@@ -4,7 +4,12 @@ import { RateLimitTracker } from '@/api/rateLimitTracker.js';
 import { getBaseUrl } from '@/config/environment.js';
 import type { EbayConfig } from '@/types/ebay.js';
 import { getErrorMessage } from '@/utils/errors.js';
-import { httpRequestEffect, isHttpError, type ResponseType } from '@/utils/http.js';
+import {
+  httpRequestEffect,
+  isHttpError,
+  type HttpResponse,
+  type ResponseType,
+} from '@/utils/http.js';
 import { isRecord } from '@/utils/typeGuards.js';
 import { apiLogger, logRequest, logResponse, logErrorResponse } from '@/utils/logger.js';
 import { Effect } from 'effect';
@@ -167,6 +172,19 @@ export class EbayApiClient {
     endpoint: string,
     options: EbayRequestOptions,
   ): Promise<T> {
+    const response = await this.requestWithResponse<T>(method, endpoint, options);
+    return response.data;
+  }
+
+  /**
+   * Core request boundary for endpoints that need response metadata such as
+   * Location or Content-Disposition headers.
+   */
+  private async requestWithResponse<T>(
+    method: string,
+    endpoint: string,
+    options: EbayRequestOptions,
+  ): Promise<HttpResponse<T>> {
     return await Effect.runPromise(this.requestEffect<T>(method, endpoint, options));
   }
 
@@ -177,7 +195,7 @@ export class EbayApiClient {
     method: string,
     endpoint: string,
     options: EbayRequestOptions,
-  ): Effect.Effect<T, EbayClientRequestError> {
+  ): Effect.Effect<HttpResponse<T>, EbayClientRequestError> {
     const url = options.absolute ? endpoint : `${this.baseUrl}${endpoint}`;
     return this.sendWithRetry<T>(method, url, options, {
       authRetried: false,
@@ -193,7 +211,7 @@ export class EbayApiClient {
     url: string,
     options: EbayRequestOptions,
     state: RequestRetryState,
-  ): Effect.Effect<T, EbayClientRequestError> {
+  ): Effect.Effect<HttpResponse<T>, EbayClientRequestError> {
     return Effect.gen(this, function* () {
       // In proxy auth mode the upstream proxy supplies credentials, so the server
       // neither requires nor validates its own. See EBAY_MCP_DISABLE_AUTH_HEADER.
@@ -220,6 +238,13 @@ export class EbayApiClient {
         ...this.getDefaultHeaders(),
         ...options.headers,
       };
+      if (options.data instanceof FormData) {
+        for (const key of Object.keys(headers)) {
+          if (key.toLowerCase() === 'content-type') {
+            delete headers[key];
+          }
+        }
+      }
 
       // Proxy auth mode: attach no Authorization header and acquire no token —
       // the upstream proxy injects whatever credentials eBay requires.
@@ -270,7 +295,7 @@ export class EbayApiClient {
             response.headers['x-ebay-c-ratelimit-limit'],
           );
 
-          return response.data;
+          return response;
         }),
         Effect.catchAll((error) =>
           this.handleRequestFailure<T>(error, { method, url, options, state }),
@@ -285,7 +310,7 @@ export class EbayApiClient {
   private handleRequestFailure<T>(
     error: unknown,
     context: RequestFailureContext,
-  ): Effect.Effect<T, EbayClientRequestError> {
+  ): Effect.Effect<HttpResponse<T>, EbayClientRequestError> {
     const { method, url, options, state } = context;
 
     if (!isHttpError(error)) {
@@ -445,6 +470,37 @@ export class EbayApiClient {
     return await this.request<T>('POST', endpoint, {
       data,
       params: config?.params,
+      headers: config?.headers,
+      responseType: config?.responseType,
+    });
+  }
+
+  /**
+   * Make a POST request and retain normalized response status and headers.
+   */
+  async postResponse<T = unknown>(
+    endpoint: string,
+    data?: unknown,
+    config?: EbayRequestConfig,
+  ): Promise<HttpResponse<T>> {
+    return await this.requestWithResponse<T>('POST', endpoint, {
+      data,
+      params: config?.params,
+      headers: config?.headers,
+      responseType: config?.responseType,
+    });
+  }
+
+  /**
+   * Make a GET request and retain normalized response status and headers.
+   */
+  async getResponse<T = unknown>(
+    endpoint: string,
+    params?: Record<string, unknown>,
+    config?: EbayRequestConfig,
+  ): Promise<HttpResponse<T>> {
+    return await this.requestWithResponse<T>('GET', endpoint, {
+      params: { ...params, ...config?.params },
       headers: config?.headers,
       responseType: config?.responseType,
     });

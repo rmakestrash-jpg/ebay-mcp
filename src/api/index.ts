@@ -6,6 +6,7 @@ import { MessageApi } from '@/api/communication/message.js';
 import { NegotiationApi } from '@/api/communication/negotiation.js';
 import { NotificationApi } from '@/api/communication/notification.js';
 import { DeveloperApi } from '@/api/developer/developer.js';
+import { FeedApi } from '@/api/feed/feed.js';
 import { InventoryApi } from '@/api/listing-management/inventory.js';
 import { MetadataApi } from '@/api/listing-metadata/metadata.js';
 import { TaxonomyApi } from '@/api/listing-metadata/taxonomy.js';
@@ -53,6 +54,7 @@ export class EbaySellerApi {
   public edelivery: EDeliveryApi;
   public finding: FindingApi;
   public developer: DeveloperApi;
+  public feed: FeedApi;
   public trading: TradingApi;
 
   constructor(config: EbayConfig) {
@@ -80,6 +82,7 @@ export class EbaySellerApi {
     this.edelivery = new EDeliveryApi(this.client);
     this.finding = new FindingApi(this.client);
     this.developer = new DeveloperApi(this.client);
+    this.feed = new FeedApi(this.client);
     const tradingClient = new TradingApiClient(this.client);
     this.trading = new TradingApi(tradingClient);
   }
@@ -164,5 +167,6 @@ export * from '@/api/other/identity.js';
 export * from '@/api/other/translation.js';
 export * from '@/api/other/vero.js';
 export * from '@/api/developer/developer.js';
+export * from '@/api/feed/feed.js';
 export * from '@/api/trading/trading.js';
 export * from '@/api/clientTrading.js';

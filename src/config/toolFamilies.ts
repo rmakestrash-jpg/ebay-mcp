@@ -23,6 +23,7 @@ export const TOOL_FAMILY_KEYS = [
   'token-management',
   'account',
   'inventory',
+  'feed',
   'fulfillment',
   'marketing',
   'analytics',

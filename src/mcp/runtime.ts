@@ -11,7 +11,7 @@ import {
   toolNamesInFamilies,
 } from '@/mcp/toolGating.js';
 import { buildUiToolResult, createUiBridge, type UiBridge } from '@/mcp/uiBridge.js';
-import { getToolEntries, type ToolEntry } from '@/tools/registry.js';
+import { executeTool, getToolEntries, type ToolEntry } from '@/tools/registry.js';
 import { getErrorMessage } from '@/utils/errors.js';
 import { serverLogger, toolLogger } from '@/utils/logger.js';
 import { Effect } from 'effect';
@@ -181,9 +181,12 @@ export const createEbayMcpRuntime = (options: EbayMcpRuntimeOptions = {}): EbayM
     for (const handle of handles.values()) {
       handle.disable();
     }
-    registerMetaTools(server, createToolGatingController(handles));
+    registerMetaTools(
+      server,
+      createToolGatingController(handles, (name, args) => executeTool(api, name, args)),
+    );
     serverLogger.info(
-      `Dynamic tool mode: ${handles.size} eBay tools hidden behind 3 discovery tools`,
+      `Dynamic tool mode: ${handles.size} eBay tools hidden behind 4 discovery tools`,
     );
   } else if (mode.kind === 'static') {
     serverLogger.info(

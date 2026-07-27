@@ -31,6 +31,7 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
 
 describe('MCP runtime', () => {
   it('registers the shared tool registry on server construction', async () => {
+    vi.stubEnv('EBAY_MCP_TOOLS', 'all');
     const { createEbayMcpRuntime } = await import('@/mcp/runtime.js');
     const api = {
       initialize: vi.fn(() => Effect.succeed(undefined)),

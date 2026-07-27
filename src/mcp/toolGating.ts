@@ -32,8 +32,9 @@ const MAX_LIST_LIMIT = 100;
  */
 export const DYNAMIC_MODE_INSTRUCTIONS =
   'This eBay server keeps its full tool catalogue hidden to save context. Only the discovery tools are visible right now. ' +
-  'Call `list_ebay_tools` (no arguments) to see the tool families, then `list_ebay_tools` with a `family` or `query` to find specific tools, ' +
-  'then `enable_ebay_tools` with the tool names you need — they will appear as normal tools you can call. ' +
+  'Call `list_ebay_tools` (no arguments) to see the tool families, then `list_ebay_tools` with a `family` or `query` to find specific tools. ' +
+  'Call `call_ebay_tool` with the exact discovered tool name and its arguments to execute it through a stable proxy. ' +
+  'Hosts that support live tool-list refreshes may instead use `enable_ebay_tools` to expose the native tool schema. ' +
   'Call `disable_ebay_tools` to remove tools you no longer need and reclaim context.';
 
 /** One discoverable eBay tool — lightweight by design; the full input schema arrives only on enable. */
@@ -110,6 +111,15 @@ const dynamicToolNamesInputSchema = z.object({
     .describe('Exact tool names to enable or disable, as returned by list_ebay_tools.'),
 });
 
+/** Input accepted by the stable dynamic-mode execution proxy. */
+const callEbayToolInputSchema = z.object({
+  name: z.string().min(1).describe('Exact eBay tool name returned by list_ebay_tools.'),
+  arguments: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Arguments for the selected eBay tool. Omit for tools that take no arguments.'),
+});
+
 /**
  * Resolves the tool names belonging to the given families, preserving the caller's
  * ability to filter registry entries for static mode. Unknown family keys
@@ -154,6 +164,8 @@ export interface ToolGatingController {
   enable(names: string[]): MutationResult;
   /** Disables registered eBay tools by exact tool name. */
   disable(names: string[]): MutationResult;
+  /** Executes a registered eBay tool through the stable dynamic proxy. */
+  invoke(name: string, args: Record<string, unknown>): Promise<unknown>;
 }
 
 /** Parses an opaque list cursor (a stringified offset) back into a non-negative offset. */
@@ -180,6 +192,9 @@ const parseCursor = (cursor: string | undefined): number => {
  */
 export const createToolGatingController = (
   handles: Map<string, RegisteredTool>,
+  invokeTool: (name: string, args: Record<string, unknown>) => Promise<unknown> = async (name) => {
+    throw new Error(`Dynamic invocation is not configured for tool: ${name}`);
+  },
 ): ToolGatingController => {
   const activeCount = (): number => [...handles.values()].filter((handle) => handle.enabled).length;
 
@@ -258,6 +273,12 @@ export const createToolGatingController = (
 
     enable: (names) => mutate(names, true),
     disable: (names) => mutate(names, false),
+    async invoke(name, args) {
+      if (!handles.has(name)) {
+        throw new Error(`Unknown eBay tool: ${name}`);
+      }
+      return await invokeTool(name, args);
+    },
   };
 };
 
@@ -289,6 +310,35 @@ export const registerMetaTools = (server: McpServer, controller: ToolGatingContr
       inputSchema: listEbayToolsInputSchema.shape,
     },
     (args) => toToolResult(controller.list(decodeEffectSchemaSync(listEbayToolsInputSchema, args))),
+  );
+
+  server.registerTool(
+    'call_ebay_tool',
+    {
+      description:
+        'Execute any eBay tool returned by list_ebay_tools through a stable proxy. Pass the exact tool name and its arguments. This supports hosts that do not refresh newly enabled MCP tool schemas. The selected operation may read or write eBay data, so inspect the discovered tool name and summary before calling.',
+      inputSchema: callEbayToolInputSchema.shape,
+    },
+    async (args) => {
+      const decoded = decodeEffectSchemaSync(callEbayToolInputSchema, args);
+      try {
+        return toToolResult(await controller.invoke(decoded.name, decoded.arguments ?? {}));
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { error: error instanceof Error ? error.message : String(error) },
+                null,
+                2,
+              ),
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
   );
 
   server.registerTool(

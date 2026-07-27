@@ -146,7 +146,12 @@ describe('registerMetaTools', () => {
     registerMetaTools(server, createToolGatingController(buildHandles()));
 
     const names = registerTool.mock.calls.map((call) => call[0]);
-    expect(names).toEqual(['list_ebay_tools', 'enable_ebay_tools', 'disable_ebay_tools']);
+    expect(names).toEqual([
+      'list_ebay_tools',
+      'call_ebay_tool',
+      'enable_ebay_tools',
+      'disable_ebay_tools',
+    ]);
   });
 
   it('wires each meta-tool handler to the controller', () => {

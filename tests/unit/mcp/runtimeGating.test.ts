@@ -63,7 +63,12 @@ const fakeApi = { initialize: vi.fn() } as never;
 const serverConfig = { name: 'test-mcp', version: '0.0.0' };
 const inventoryCount = toolCategories.find((category) => category.key === 'inventory')!.entries
   .length;
-const META_TOOL_NAMES = ['list_ebay_tools', 'enable_ebay_tools', 'disable_ebay_tools'];
+const META_TOOL_NAMES = [
+  'list_ebay_tools',
+  'call_ebay_tool',
+  'enable_ebay_tools',
+  'disable_ebay_tools',
+];
 
 describe('createEbayMcpRuntime — tool gating', () => {
   beforeEach(() => {

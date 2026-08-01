@@ -17,7 +17,7 @@ export class ToolRegistryError extends Data.TaggedError('ToolRegistryError')<{
  * the MCP Apps layer via `defineTool({ ui })`.
  *
  * `map` is intentionally type-erased to `(result: unknown) => ViewModel` so the
- * entry stays non-generic and uniform across all 322 tools. The erasure is safe:
+ * entry stays non-generic and uniform across all registered tools. The erasure is safe:
  * `defineTool` proves, against the handler's concrete return type, that `map`
  * produces the archetype's view model before erasing it here — so a drift between
  * handler shape and mapper is a compile error at the call site, not a runtime

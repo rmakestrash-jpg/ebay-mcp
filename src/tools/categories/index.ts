@@ -13,6 +13,8 @@ import { browseEntries } from './browse.js';
 import { otherEntries } from './other.js';
 import { developerEntries } from './developer.js';
 import { tradingEntries } from './trading.js';
+import { feedEntries } from './feed.js';
+import { mediaEntries } from './media.js';
 
 /**
  * A named group of registered tool entries, owned by one eBay API area (or the
@@ -38,6 +40,8 @@ export const toolCategories: ToolCategory[] = [
   { key: 'token-management', title: 'Token Management', entries: tokenManagementEntries },
   { key: 'account', title: 'Account', entries: accountEntries },
   { key: 'inventory', title: 'Inventory', entries: inventoryEntries },
+  { key: 'feed', title: 'Feed', entries: feedEntries },
+  { key: 'media', title: 'Media', entries: mediaEntries },
   { key: 'fulfillment', title: 'Fulfillment', entries: fulfillmentEntries },
   { key: 'marketing', title: 'Marketing', entries: marketingEntries },
   { key: 'analytics', title: 'Analytics', entries: analyticsEntries },

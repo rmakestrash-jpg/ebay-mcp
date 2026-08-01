@@ -6,7 +6,10 @@ import { MessageApi } from '@/api/communication/message.js';
 import { NegotiationApi } from '@/api/communication/negotiation.js';
 import { NotificationApi } from '@/api/communication/notification.js';
 import { DeveloperApi } from '@/api/developer/developer.js';
+import { FeedApi } from '@/api/feed/feed.js';
+import { MediaApi } from '@/api/media/media.js';
 import { InventoryApi } from '@/api/listing-management/inventory.js';
+import { UnpublishedOfferApi } from '@/api/listing-management/unpublishedOffer.js';
 import { MetadataApi } from '@/api/listing-metadata/metadata.js';
 import { TaxonomyApi } from '@/api/listing-metadata/taxonomy.js';
 import { MarketingApi } from '@/api/marketing-and-promotions/marketing.js';
@@ -53,6 +56,9 @@ export class EbaySellerApi {
   public edelivery: EDeliveryApi;
   public finding: FindingApi;
   public developer: DeveloperApi;
+  public feed: FeedApi;
+  public media: MediaApi;
+  public unpublishedOffer: UnpublishedOfferApi;
   public trading: TradingApi;
 
   constructor(config: EbayConfig) {
@@ -80,6 +86,9 @@ export class EbaySellerApi {
     this.edelivery = new EDeliveryApi(this.client);
     this.finding = new FindingApi(this.client);
     this.developer = new DeveloperApi(this.client);
+    this.feed = new FeedApi(this.client);
+    this.media = new MediaApi(this.client);
+    this.unpublishedOffer = new UnpublishedOfferApi(this.inventory, this.media);
     const tradingClient = new TradingApiClient(this.client);
     this.trading = new TradingApi(tradingClient);
   }
@@ -151,6 +160,7 @@ export * from '@/api/communication/message.js';
 export * from '@/api/communication/negotiation.js';
 export * from '@/api/communication/notification.js';
 export * from '@/api/listing-management/inventory.js';
+export * from '@/api/listing-management/unpublishedOffer.js';
 export * from '@/api/listing-metadata/metadata.js';
 export * from '@/api/listing-metadata/taxonomy.js';
 export * from '@/api/marketing-and-promotions/marketing.js';
@@ -164,5 +174,7 @@ export * from '@/api/other/identity.js';
 export * from '@/api/other/translation.js';
 export * from '@/api/other/vero.js';
 export * from '@/api/developer/developer.js';
+export * from '@/api/feed/feed.js';
+export * from '@/api/media/media.js';
 export * from '@/api/trading/trading.js';
 export * from '@/api/clientTrading.js';

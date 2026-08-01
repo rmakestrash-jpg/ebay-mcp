@@ -207,6 +207,9 @@ const prepareBody = (body: unknown): PreparedBody => {
   if (body instanceof URLSearchParams) {
     return { body: body.toString(), contentType: 'application/x-www-form-urlencoded' };
   }
+  if (body instanceof FormData || body instanceof Blob) {
+    return { body };
+  }
   if (body instanceof Uint8Array || body instanceof ArrayBuffer) {
     return { body: body as BodyInit };
   }

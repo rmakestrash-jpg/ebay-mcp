@@ -27,7 +27,7 @@ export const buildUsingDoc = (snapshot: RegistrySnapshot): SkillDoc => ({
   slug: 'ebay-mcp-using',
   title: 'Using the eBay MCP tools',
   description: `Drive eBay's Sell APIs through the ebay-mcp server: ${snapshot.toolCount} tools for listings, orders, marketing, and analytics. Use when creating or revising listings, fulfilling orders, issuing refunds, running Promoted Listings campaigns, or debugging eBay auth/rate-limit errors.`,
-  intro: `The \`ebay-mcp\` server exposes **${snapshot.toolCount} tools across 100% of eBay's Sell APIs**, running locally over MCP. Every tool is named \`ebay_<verb>_<noun>\` (plus two ChatGPT-connector tools, \`search\`/\`fetch\`). You already see each tool's input schema via \`tools/list\` — this skill covers what discovery can't: which tools to chain, what eBay requires first, and how to read its errors.`,
+  intro: `The \`ebay-mcp\` server exposes **${snapshot.toolCount} tools with broad coverage of eBay's Sell APIs**, running locally over MCP. Every tool is named \`ebay_<verb>_<noun>\` (plus two ChatGPT-connector tools, \`search\`/\`fetch\`). You already see each tool's input schema via \`tools/list\` — this skill covers what discovery can't: which tools to chain, what eBay requires first, and how to read its errors.`,
   sections: [
     {
       heading: 'Authentication & environment',
@@ -61,6 +61,9 @@ export const buildUsingDoc = (snapshot: RegistrySnapshot): SkillDoc => ({
         '',
         '**Legacy XML path (Trading API).**',
         '`ebay_create_listing` / `ebay_revise_listing` / `ebay_relist_item` / `ebay_end_listing`, list via `ebay_get_active_listings`. Use only when you specifically need the legacy flow — do not mix it with the REST Inventory model for the same SKU.',
+        '',
+        '**Run a general Sell Feed upload workflow.**',
+        '`ebay_create_feed_task` → `ebay_upload_feed_file` → poll `ebay_get_feed_task` → `ebay_get_feed_result_file`. For Seller Hub drafts, use the `FX_LISTING` feed type and Draft actions in the CSV.',
         '',
         '**Diagnose failing calls.**',
         '`ebay_get_token_status` (auth valid/expiring?) → `ebay_get_rate_limits` / `ebay_get_user_rate_limits` (quota hit?) → `ebay_get_api_status` (eBay-side outage?).',
@@ -99,7 +102,7 @@ export const buildContributingDoc = (snapshot: RegistrySnapshot): SkillDoc => ({
   slug: 'ebay-mcp-contributing',
   title: 'Contributing to ebay-mcp',
   description: `Work on the ebay-mcp server itself: ${snapshot.toolCount} tools across eBay's Sell APIs (TypeScript/ESM, Effect-backed validation, OpenAPI-generated types). Use when adding or changing eBay tools/endpoints, wiring the registry, or running the project's checks.`,
-  intro: `A local MCP server exposing **${snapshot.toolCount} tools across 100% of eBay's Sell APIs** — TypeScript/Node.js (ESM), \`@modelcontextprotocol/sdk\`, Effect-backed validation, OpenAPI-generated types. Entry points: \`src/index.ts\` (STDIO) and \`src/serverHttp.ts\` (HTTP).`,
+  intro: `A local MCP server exposing **${snapshot.toolCount} tools with broad coverage of eBay's Sell APIs** — TypeScript/Node.js (ESM), \`@modelcontextprotocol/sdk\`, Effect-backed validation, OpenAPI-generated types. Entry points: \`src/index.ts\` (STDIO) and \`src/serverHttp.ts\` (HTTP).`,
   sections: [
     {
       heading: 'Validation (run before a PR)',

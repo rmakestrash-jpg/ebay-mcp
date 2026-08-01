@@ -14,6 +14,7 @@ const FAMILY_BLURBS: Record<string, string> = {
     'Business policies (payment, return, fulfillment), privileges, program opt-in, sales tax',
   inventory:
     'Inventory items, offers, locations, inventory groups, bulk publish — the REST listing model',
+  feed: 'Sell Feed upload tasks, multipart file uploads, task status, and input/result downloads',
   fulfillment: 'Orders, shipping fulfillments, refunds, and payment disputes',
   marketing: 'Promoted Listings campaigns, ads, promotions, and marketing reports',
   analytics: 'Seller standards, traffic reports, and customer-service metrics',

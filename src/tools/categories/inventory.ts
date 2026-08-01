@@ -47,6 +47,10 @@ import {
   offerResponseSchema,
   publishOfferOutputSchema,
 } from '@/schemas/inventory-management/inventory.js';
+import {
+  createUnpublishedOfferInputSchema,
+  unpublishedOfferOutputSchema,
+} from '@/schemas/inventory-management/unpublishedOffer.js';
 
 const emptyOutputSchema = {
   type: 'object',
@@ -206,6 +210,17 @@ const listingFeesOutputSchema = z
 
 /** Inventory API tools for seller inventory items, offers, locations, and bulk operations. */
 export const inventoryEntries: ToolEntry[] = [
+  defineTool({
+    name: 'ebay_create_unpublished_offer',
+    description:
+      'Create or update an API-native eBay draft. Creates the inventory item, optionally uploads images, creates or updates an offer, verifies it by reading it back, and deliberately leaves it UNPUBLISHED. This tool never publishes a listing. Pass offerId to update an existing draft. Required OAuth Scope: sell.inventory',
+    inputSchema: createUnpublishedOfferInputSchema.shape,
+    outputSchema: zodToJsonSchema(unpublishedOfferOutputSchema, {
+      name: 'UnpublishedOfferResponse',
+      $refStrategy: 'none',
+    }) as OutputArgs,
+    handler: (api, args) => Effect.runPromise(api.unpublishedOffer.createOrUpdate(args)),
+  }),
   defineTool({
     name: 'ebay_get_inventory_items',
     description:

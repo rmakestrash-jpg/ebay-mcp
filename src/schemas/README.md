@@ -433,7 +433,7 @@ All eBay API endpoints now have comprehensive Effect-backed schemas!
 - **Total JSON Schemas**: 220+
 - **Lines of Code**: 5,000+
 - **API Categories**: 9
-- **Coverage**: 100% of eBay Seller APIs
+- **Coverage**: Broad eBay Sell API coverage
 
 ---
 
